@@ -122,6 +122,7 @@ export function TradeDashboard() {
   useEffect(() => {
     const sub = () => {
       dispatch(resetData());
+      console.log(currentMarket);
       api.subscribeToMarket(currentMarket);
     };
 
