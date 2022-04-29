@@ -29,6 +29,7 @@ export class SpotForm extends React.Component {
   updateAmount(e) {
     const newState = { ...this.state };
     newState.baseAmount = e.target.value;
+    localStorage.setItem("baseAmount", e.target.value);
     newState.quoteAmount = "";
     this.setState(newState);
   }
@@ -103,11 +104,11 @@ export class SpotForm extends React.Component {
       quoteAmount = this.state.quoteAmount;
     }
 
-    quoteAmount = isNaN(quoteAmount) ? 0 : quoteAmount
-    baseAmount = isNaN(baseAmount) ? 0 : baseAmount
+    quoteAmount = isNaN(quoteAmount) ? 0 : quoteAmount;
+    baseAmount = isNaN(baseAmount) ? 0 : baseAmount;
     if (!baseAmount && !quoteAmount) {
       toast.error("No amount available", {
-        toastId: 'No amount available',
+        toastId: "No amount available",
       });
       return;
     }
@@ -115,7 +116,7 @@ export class SpotForm extends React.Component {
     let price = this.currentPrice();
     if (!price) {
       toast.error("No price available", {
-        toastId: 'No price available',
+        toastId: "No price available",
       });
       return;
     }
@@ -129,7 +130,7 @@ export class SpotForm extends React.Component {
 
     if (this.props.activeOrderCount > 0 && api.isZksyncChain()) {
       toast.error("Only one active order permitted at a time", {
-        toastId: 'Only one active order permitted at a time',
+        toastId: "Only one active order permitted at a time",
       });
       return;
     }
@@ -146,7 +147,7 @@ export class SpotForm extends React.Component {
     baseBalance = parseFloat(baseBalance);
     quoteBalance = parseFloat(quoteBalance);
     if (this.props.side === "s") {
-      baseAmount = baseAmount ? baseAmount : (quoteAmount / price);
+      baseAmount = baseAmount ? baseAmount : quoteAmount / price;
       quoteAmount = 0;
 
       if (isNaN(baseBalance)) {
@@ -156,7 +157,7 @@ export class SpotForm extends React.Component {
         return;
       }
 
-      if (baseAmount && (baseAmount + marketInfo.baseFee) > baseBalance) {
+      if (baseAmount && baseAmount + marketInfo.baseFee > baseBalance) {
         toast.error(`Amount exceeds ${marketInfo.baseAsset.symbol} balance`, {
           toastId: `Amount exceeds ${marketInfo.baseAsset.symbol} balance`,
         });
@@ -165,8 +166,9 @@ export class SpotForm extends React.Component {
 
       if (baseAmount && baseAmount < marketInfo.baseFee) {
         toast.error(
-          `Minimum order size is ${marketInfo.baseFee.toPrecision(5)
-          } ${marketInfo.baseAsset.symbol}`
+            `Minimum order size is ${marketInfo.baseFee.toPrecision(5)} ${
+                marketInfo.baseAsset.symbol
+            }`
         );
         return;
       }
@@ -175,28 +177,34 @@ export class SpotForm extends React.Component {
       const delta = ((askPrice - price) / askPrice) * 100;
       if (delta > 10 && this.props.orderType === "limit") {
         toast.error(
-          `You are selling ${delta.toFixed(2)
-          }% under the current market price. You will lose money when signing this transaction!`,
+            `You are selling ${delta.toFixed(
+                2
+            )}% under the current market price. You will lose money when signing this transaction!`,
           {
-            toastId: `You are selling ${delta.toFixed(2)
-              }% under the current market price. You will lose money when signing this transaction!`,
-          });
+            toastId: `You are selling ${delta.toFixed(
+                2
+            )}% under the current market price. You will lose money when signing this transaction!`,
+          }
+        );
       }
 
       if (this.props.orderType === "market") {
         price *= 0.9985;
         if (delta > 2) {
           toast.error(
-            `You are selling ${delta.toFixed(2)
-            }% under the current market price. You could lose money when signing this transaction!`,
+              `You are selling ${delta.toFixed(
+                  2
+              )}% under the current market price. You could lose money when signing this transaction!`,
             {
-              toastId: `You are selling ${delta.toFixed(2)
-                }% under the current market price. You could lose money when signing this transaction!`,
-            });
+              toastId: `You are selling ${delta.toFixed(
+                  2
+              )}% under the current market price. You could lose money when signing this transaction!`,
+            }
+          );
         }
       }
     } else if (this.props.side === "b") {
-      quoteAmount = quoteAmount ? quoteAmount : (baseAmount * price);
+      quoteAmount = quoteAmount ? quoteAmount : baseAmount * price;
       baseAmount = 0;
 
       if (isNaN(quoteBalance)) {
@@ -215,8 +223,9 @@ export class SpotForm extends React.Component {
 
       if (quoteAmount && quoteAmount < marketInfo.quoteFee) {
         toast.error(
-          `Minimum order size is ${marketInfo.quoteFee.toPrecision(5)
-          } ${marketInfo.quoteAsset.symbol}`
+            `Minimum order size is ${marketInfo.quoteFee.toPrecision(5)} ${
+                marketInfo.quoteAsset.symbol
+            }`
         );
         return;
       }
@@ -225,24 +234,30 @@ export class SpotForm extends React.Component {
       const delta = ((price - bidPrice) / bidPrice) * 100;
       if (delta > 10 && this.props.orderType === "limit") {
         toast.error(
-          `You are buying ${delta.toFixed(2)
-          }% above the current market price. You will lose money when signing this transaction!`,
+            `You are buying ${delta.toFixed(
+                2
+            )}% above the current market price. You will lose money when signing this transaction!`,
           {
-            toastId: `You are buying ${delta.toFixed(2)
-              }% above the current market price. You will lose money when signing this transaction!`,
-          });
+            toastId: `You are buying ${delta.toFixed(
+                2
+            )}% above the current market price. You will lose money when signing this transaction!`,
+          }
+        );
       }
 
       if (this.props.orderType === "market") {
         price *= 1.0015;
         if (delta > 2) {
           toast.error(
-            `You are buying ${delta.toFixed(2)
-            }% above the current market price. You could lose money when signing this transaction!`,
+              `You are buying ${delta.toFixed(
+                  2
+              )}% above the current market price. You could lose money when signing this transaction!`,
             {
-              toastId: `You are buying ${delta.toFixed(2)
-                }% above the current market price. You could lose money when signing this transaction!`,
-            });
+              toastId: `You are buying ${delta.toFixed(
+                  2
+              )}% above the current market price. You could lose money when signing this transaction!`,
+            }
+          );
         }
       }
     }
@@ -253,9 +268,10 @@ export class SpotForm extends React.Component {
     let orderPendingToast;
     if (api.isZksyncChain()) {
       orderPendingToast = toast.info(
-        "Order pending. Sign or Cancel to continue...", {
-        toastId: "Order pending. Sign or Cancel to continue...",
-      }
+          "Order pending. Sign or Cancel to continue...",
+          {
+            toastId: "Order pending. Sign or Cancel to continue...",
+          }
       );
     }
 
@@ -293,15 +309,17 @@ export class SpotForm extends React.Component {
 
     if (this.props.side === "s") {
       const baseBalance = this.getBaseBalance() - marketInfo.baseFee;
-      const baseAmount = this.state.baseAmount || 0;
+      const baseAmount =
+          localStorage.getItem("baseAmount") || this.state.baseAmount || 0;
       return Math.round((baseAmount / baseBalance) * 100);
     } else if (this.props.side === "b") {
-      const quoteBalance = this.getQuoteBalance() - marketInfo.quoteFee;;
+      const quoteBalance = this.getQuoteBalance() - marketInfo.quoteFee;
       if (this.state.quoteAmount) {
         const quoteAmount = this.state.quoteAmount || 0;
         return Math.round((quoteAmount / quoteBalance) * 100);
       } else {
-        const baseAmount = this.state.baseAmount || 0;
+        const baseAmount =
+            localStorage.getItem("baseAmount") || this.state.baseAmount || 0;
         const total = baseAmount * this.currentPrice();
         return Math.round((total / quoteBalance) * 100);
       }
@@ -343,7 +361,7 @@ export class SpotForm extends React.Component {
     if (!marketInfo) return 0;
     if (!this.props.user.id) return false;
 
-    const newstate = { ...this.state };
+    const newstate = {...this.state};
     if (val === 100) {
       newstate.maxSizeSelected = true;
       if (this.props.side === "b") {
@@ -360,10 +378,11 @@ export class SpotForm extends React.Component {
       const decimals = marketInfo.baseAsset.decimals;
       let displayAmount = (baseBalance * val) / 100;
       displayAmount -= marketInfo.baseFee;
-      displayAmount = parseFloat(displayAmount.toFixed(decimals))
-      displayAmount = (displayAmount > 9999)
-        ? displayAmount.toFixed(0)
-        : displayAmount.toPrecision(5)
+      displayAmount = parseFloat(displayAmount.toFixed(decimals));
+      displayAmount =
+          displayAmount > 9999
+              ? displayAmount.toFixed(0)
+              : displayAmount.toPrecision(5);
 
       if (displayAmount < 1e-5) {
         newstate.baseAmount = 0;
@@ -378,25 +397,26 @@ export class SpotForm extends React.Component {
       displayAmount -= marketInfo.quoteFee;
       displayAmount = parseFloat(displayAmount.toFixed(quoteDecimals))
       displayAmount = (displayAmount > 9999)
-        ? displayAmount.toFixed(0)
-        : displayAmount.toPrecision(5)
+          ? displayAmount.toFixed(0)
+          : displayAmount.toPrecision(5)
 
       if (displayAmount < 1e-5) {
         newstate.quoteAmount = 0;
       } else {
         newstate.quoteAmount = displayAmount;
         const baseDisplayAmount = parseFloat(
-          (displayAmount / this.currentPrice()).toFixed(baseDecimals)
-        )
-        newstate.baseAmount = (baseDisplayAmount > 9999)
-          ? baseDisplayAmount.toFixed(0)
-          : baseDisplayAmount.toPrecision(5)
+            (displayAmount / this.currentPrice()).toFixed(baseDecimals)
+        );
+        newstate.baseAmount =
+            baseDisplayAmount > 9999
+                ? baseDisplayAmount.toFixed(0)
+                : baseDisplayAmount.toPrecision(5);
       }
-    }
 
-    if (isNaN(newstate.baseAmount)) newstate.baseAmount = 0;
-    if (isNaN(newstate.quoteAmount)) newstate.quoteAmount = 0;
-    this.setState(newstate);
+      if (isNaN(newstate.baseAmount)) newstate.baseAmount = 0;
+      if (isNaN(newstate.quoteAmount)) newstate.quoteAmount = 0;
+      this.setState(newstate);
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -410,7 +430,12 @@ export class SpotForm extends React.Component {
     }
 
     if (this.props.currentMarket !== prevProps.currentMarket) {
-      this.setState((state) => ({ ...state, price: "", baseAmount: "", quoteAmount: "" }));
+      this.setState((state) => ({
+        ...state,
+        price: "",
+        baseAmount: "",
+        quoteAmount: "",
+      }));
     }
   }
 
@@ -472,7 +497,9 @@ export class SpotForm extends React.Component {
               value={
                 this.priceIsDisabled()
                   ? this.props.marketSummary && this.props.marketSummary?.price
-                  : this.state.userHasEditedPrice ? this.state.price : this.currentPrice()
+                    : this.state.userHasEditedPrice
+                    ? this.state.price
+                    : this.currentPrice()
               }
               onChange={this.updatePrice.bind(this)}
               disabled={this.priceIsDisabled()}
@@ -485,7 +512,11 @@ export class SpotForm extends React.Component {
             <span className="spf_desc_text">Amount</span>
             <input
               type="text"
-              value={this.state.baseAmount}
+              value={
+                localStorage.getItem("baseAmount")
+                    ? localStorage.getItem("baseAmount")
+                    : this.state.baseAmount
+              }
               placeholder="0.00"
               onChange={this.updateAmount.bind(this)}
             />
@@ -504,7 +535,9 @@ export class SpotForm extends React.Component {
                 <strong>
                   {this.props.orderType === "limit" ? (
                     <>
-                      {(this.currentPrice() * this.state.baseAmount).toPrecision(6)}{" "}
+                      {(
+                          this.currentPrice() * this.state.baseAmount
+                      ).toPrecision(6)}{" "}
                       {marketInfo && marketInfo.quoteAsset.symbol}
                     </>
                   ) : (

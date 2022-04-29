@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { constants as ethersConstants, utils as ethersUtils } from "ethers";
+import {
+  constants as ethersConstants,
+  utils as ethersUtils
+} from 'ethers';
 import { useSelector } from "react-redux";
 import isEmpty from "lodash/isEmpty";
 import { SwapButton, Button, useCoinEstimator } from "components";
@@ -26,9 +29,10 @@ import FastWithdrawTooltip from "./FastWithdrawTooltip";
 import {
   NETWORKS,
   ZKSYNC_ETHEREUM_FAST_BRIDGE,
-  ZKSYNC_POLYGON_BRIDGE,
-} from "./constants";
+  ZKSYNC_POLYGON_BRIDGE
+} from "./constants"
 import { toast } from "react-toastify";
+import _ from "lodash";
 
 const defaultTransfer = {
   type: "deposit",
@@ -48,8 +52,8 @@ const Bridge = () => {
   const [swapCurrencyInfo, setSwapCurrencyInfo] = useState({ decimals: 0 });
   const [allowance, setAllowance] = useState(ethersConstants.Zero);
   const [hasAllowance, setHasAllowance] = useState(false);
-  const [fromNetwork, setFromNetwork] = useState(NETWORKS[0]);
-  const [toNetwork, setToNetwork] = useState(fromNetwork.to[0]);
+  const [fromNetwork, setFromNetwork] = useState(NETWORKS[0])
+  const [toNetwork, setToNetwork] = useState(fromNetwork.to[0])
   const [balances, setBalances] = useState([]);
   const [altBalances, setAltBalances] = useState([]);
   const [swapDetails, _setSwapDetails] = useState(() => ({
@@ -67,18 +71,9 @@ const Bridge = () => {
     {}
   );
 
-  const walletBalances = useMemo(
-    () => (balanceData.wallet ? balanceData.wallet : {}),
-    [balanceData.wallet]
-  );
-  const zkBalances = useMemo(
-    () => (balanceData[network] ? balanceData[network] : {}),
-    [balanceData, network]
-  );
-  const polygonBalances = useMemo(
-    () => (balanceData.polygon ? balanceData.polygon : {}),
-    [balanceData.polygon]
-  );
+  const walletBalances = useMemo(()=> (balanceData.wallet) ? balanceData.wallet : {}, [balanceData.wallet])
+  const zkBalances = useMemo(()=> (balanceData[network]) ? balanceData[network] : {} , [balanceData, network])
+  const polygonBalances = useMemo(()=> (balanceData.polygon) ? balanceData.polygon : {}, [balanceData.polygon])
 
   const _getBalances = (_network) => {
     let balances = [];
@@ -92,63 +87,64 @@ const Bridge = () => {
       setFormErr("Bad Network");
     }
     return balances;
-  };
 
-  useEffect(async () => {
-    if (!user.address) return;
+  }
+
+  useEffect(async()=> {
+    if(!user.address) return;
     setBalances(_getBalances(fromNetwork.from.key));
     setAltBalances(_getBalances(toNetwork.key));
-  }, [toNetwork, user.address, walletBalances, zkBalances, polygonBalances]);
+  }, [toNetwork, user.address, walletBalances, zkBalances, polygonBalances])
 
   const [withdrawSpeed, setWithdrawSpeed] = useState("fast");
   const isFastWithdraw =
     withdrawSpeed === "fast" &&
     transfer.type === "withdraw" &&
     api.apiProvider.eligibleFastWithdrawTokens.includes(swapDetails.currency);
-
+ 
   const hasError = formErr && formErr.length > 0;
   const isSwapAmountEmpty = swapDetails.amount === "";
 
-  useEffect(() => {
+  useEffect(()=>{
     setHasAllowance(
       balances[swapDetails.currency] &&
-        balances[swapDetails.currency].allowance.gte(MAX_ALLOWANCE.div(3))
+      balances[swapDetails.currency].allowance.gte(MAX_ALLOWANCE.div(3))
     );
-  }, [toNetwork, swapDetails]);
+  }, [toNetwork, swapDetails])
 
-  useEffect(() => {
-    if (fromNetwork.from.key === "polygon") {
-      setSwapDetails({ amount: "", currency: "WETH" });
-    } else if (
-      fromNetwork.from.key === "ethereum" &&
-      swapDetails.currency === "WETH"
-    ) {
-      setSwapDetails({ amount: "", currency: "ETH" });
-    } else if (
-      fromNetwork.from.key === "zksync" &&
-      swapDetails.currency === "WETH"
-    ) {
-      setSwapDetails({ amount: "", currency: "ETH" });
+  useEffect(()=>{
+    console.log(fromNetwork)
+    if (fromNetwork.from.key === 'polygon') {
+      setSwapDetails({ amount: '', currency: 'WETH' })
     }
-    if (fromNetwork.from.key === "zksync" && toNetwork.key === "ethereum") {
-      const type = (transfer.type = "withdraw");
-      setTransfer({ type });
-    } else {
-      const type = (transfer.type = "deposit");
+    else if (fromNetwork.from.key === 'ethereum' && swapDetails.currency === 'WETH') {
+      setSwapDetails({ amount: '', currency: 'ETH' })
+    }
+    else if (fromNetwork.from.key === 'zksync' && swapDetails.currency === 'WETH') {
+      setSwapDetails({ amount: '', currency: 'ETH' })
+    }
+    if(fromNetwork.from.key === 'zksync' && toNetwork.key === 'ethereum'){    
+      const type = transfer.type = "withdraw";
       setTransfer({ type });
     }
-  }, [toNetwork]);
+    else{
+      const type = transfer.type = "deposit";
+      setTransfer({ type });
+    }
+    console.log(transfer.type)
+  }, [toNetwork])
 
   useEffect(() => {
-    let _swapCurrencyInfo = {};
-    if (swapDetails.currency === "WETH") {
-      _swapCurrencyInfo = api.getCurrencyInfo("ETH");
-    } else {
+    let _swapCurrencyInfo = {}
+    if (swapDetails.currency === 'WETH'){
+      _swapCurrencyInfo = api.getCurrencyInfo('ETH');
+    }
+    else {
       _swapCurrencyInfo = api.getCurrencyInfo(swapDetails.currency);
     }
 
-    setSwapCurrencyInfo(_swapCurrencyInfo);
-
+    setSwapCurrencyInfo(_swapCurrencyInfo)
+    
     if (swapDetails.currency === "ETH") {
       setAllowance(MAX_ALLOWANCE);
       setHasAllowance(true);
@@ -158,12 +154,12 @@ const Bridge = () => {
       return;
     }
 
+
     const swapAmountBN = ethersUtils.parseUnits(
-      isSwapAmountEmpty ? "0.0" : swapDetails.amount,
+      isSwapAmountEmpty ? '0.0' : swapDetails.amount,
       _swapCurrencyInfo?.decimals
     );
-    const allowanceBN =
-      balances[swapDetails.currency]?.allowance ?? ethersConstants.Zero;
+    const allowanceBN = balances[swapDetails.currency]?.allowance ?? ethersConstants.Zero;
     setAllowance(allowanceBN);
     setHasAllowance(allowanceBN.gte(swapAmountBN));
   }, [balances, swapDetails, isSwapAmountEmpty]);
@@ -185,9 +181,7 @@ const Bridge = () => {
 
   useEffect(() => {
     if (
-      !api.apiProvider.eligibleFastWithdrawTokens?.includes(
-        swapDetails.currency
-      )
+      !api.apiProvider.eligibleFastWithdrawTokens?.includes(swapDetails.currency)
     ) {
       setWithdrawSpeed("normal");
     } else {
@@ -203,22 +197,19 @@ const Bridge = () => {
 
   const validateInput = (inputValue, swapCurrency) => {
     if (balances.length === 0) return false;
-    const getCurrencyBalance = (cur) =>
-      balances[cur] && swapCurrencyInfo?.decimals
-        ? balances[cur].value / 10 ** swapCurrencyInfo.decimals
-        : 0;
+    const getCurrencyBalance = (cur) => (balances[cur] && swapCurrencyInfo?.decimals ? balances[cur].value / (10 ** (swapCurrencyInfo.decimals)) : 0);
     const detailBalance = getCurrencyBalance(swapCurrency);
 
     let error = null;
     if (inputValue > 0) {
       if (inputValue <= activationFee) {
-        error = `Must be more than ${activationFee} ${swapCurrency}`;
+        error = `Must be more than ${activationFee} ${swapCurrency}`
       } else if (L2Fee !== null && inputValue < L2Fee) {
         error = "Amount too small";
       } else if (inputValue >= detailBalance) {
         error = "Insufficient balance";
       } else if (isFastWithdraw) {
-        if (L1Fee !== null && inputValue < L1Fee) {
+        if (L1Fee !== null  && inputValue < L1Fee) {
           error = "Amount too small";
         }
 
@@ -228,30 +219,24 @@ const Bridge = () => {
             error = `Max ${swapCurrency} liquidity for fast withdraw: ${maxAmount.toPrecision(
               4
             )}`;
-          } else if (
-            L1Fee !== null &&
-            L2Fee !== null &&
-            inputValue < L2Fee + L1Fee
-          ) {
+          } else if (L1Fee !== null && L2Fee !== null && inputValue < (L2Fee + L1Fee)) {
             error = "Amount too small";
           }
         }
       } else if (L2FeeToken !== null && L2FeeToken === swapCurrency) {
-        if (L2Fee !== null && inputValue + L2Fee > detailBalance) {
+        if (L2Fee !== null && (inputValue + L2Fee) > detailBalance) {
           error = "Insufficient balance for fees";
         }
-      } else if (L2FeeToken !== null) {
+      } else if(L2FeeToken !== null){
         const feeCurrencyBalance = getCurrencyBalance(L2FeeToken);
         if (L1Fee != null && feeCurrencyBalance < L1Fee) {
           error = "Insufficient balance for fees";
         }
-      } else if (
-        /*else if (L1Fee !== null  && inputValue < L1Fee) {
+      }
+      /*else if (L1Fee !== null  && inputValue < L1Fee) {
         error = "Amount too small";
       }*/
-        inputValue < 0.0001 &&
-        (fromNetwork.from.key === "polygon" || toNetwork.key === "polygon")
-      ) {
+      else if (inputValue < 0.0001 && (fromNetwork.from.key === 'polygon' || toNetwork.key === 'polygon')) {
         error = "Insufficient amount";
       }
     }
@@ -266,13 +251,13 @@ const Bridge = () => {
   const validateFees = (inputValue, bridgeFee, feeCurrency) => {
     const feeCurrencyInfo = api.getCurrencyInfo(feeCurrency);
     if (balances.length === 0) return false;
-    const feeTokenBalance = parseFloat(
-      balances[feeCurrency] &&
-        balances[feeCurrency].value / 10 ** feeCurrencyInfo.decimals
-    );
+    const feeTokenBalance = parseFloat(balances[feeCurrency] && balances[feeCurrency].value / (10 ** feeCurrencyInfo.decimals))
 
-    if (inputValue > 0 && bridgeFee > feeTokenBalance) {
-      setFormErr("Not enough balance to pay for fees");
+    if (
+      inputValue > 0 &&
+      bridgeFee > feeTokenBalance
+    ) {
+      setFormErr("Not enough balance to pay for fees")
       return false;
     }
     return true;
@@ -290,8 +275,7 @@ const Bridge = () => {
         setFee(null);
       });
 
-    api
-      .withdrawL2FastBridgeFee(details.currency)
+    api.withdrawL2FastBridgeFee(details.currency)
       .then((res) => {
         setL1Fee(res);
       })
@@ -302,8 +286,7 @@ const Bridge = () => {
   };
 
   const setNormalWithdrawFees = (setFee, details) => {
-    api
-      .withdrawL2GasFee(details.currency)
+    api.withdrawL2GasFee(details.currency)
       .then(({ amount, feeToken }) => {
         setFee(amount, feeToken);
       })
@@ -315,35 +298,44 @@ const Bridge = () => {
   };
 
   const setSwapDetails = async (values) => {
+    setLoading(true);
     const details = {
       ...swapDetails,
       ...values,
     };
 
+    console.log(details)
     _setSwapDetails(details);
 
-    const setFee = (bridgeFee, feeToken) => {
-      setL2Fee(bridgeFee);
-      setL2FeeToken(feeToken);
-      const input = parseFloat(details.amount) || 0;
-      const isInputValid = validateInput(input, details.currency);
-      const isFeesValid = validateFees(input, bridgeFee, feeToken);
-      if (isFeesValid && isInputValid) {
+    const setFee = async(bridgeFee, feeToken) => {
+      setL2Fee(bridgeFee)
+      setL2FeeToken(feeToken)
+      const input = parseFloat(details.amount) || 0
+      const isInputValid = validateInput(input, details.currency)
+      const isFeesValid = validateFees(input, bridgeFee, feeToken)
+      if (isFeesValid && isInputValid && input !== 0) {
+        // setTimeout(()=>{setLoading(false)},3000)
         setFormErr("");
+      } 
+      else 
+      {
+        setLoading(false);
       }
     };
+
 
     // setFee(null); setFee has two parameters. what is this?
     setL1Fee(null);
 
-    if (fromNetwork.from.key === "polygon") {
+    if(fromNetwork.from.key === 'polygon') {
       const gasFee = await api.getPolygonFee();
-      if (gasFee) {
-        setL1Fee((35000 * gasFee.fast.maxFee) / 10 ** 9);
-        setFee(0, null);
+      if(gasFee){
+        setL1Fee(35000 * gasFee.fast.maxFee / 10**9);
+        setFee(0, null)
       }
       return;
-    } else if (transfer.type === "withdraw") {
+    }
+    else if (transfer.type === "withdraw") {
       if (api.apiProvider.syncWallet) {
         if (isFastWithdraw) {
           setFastWithdrawFees(setFee, details);
@@ -353,23 +345,28 @@ const Bridge = () => {
       }
     } else {
       const gasFee = await api.depositL2Fee(details.currency);
-      if (gasFee) {
+      console.log(gasFee)
+      if(gasFee){
         let fee = gasFee.maxFeePerGas
           .add(gasFee.maxPriorityFeePerGas)
-          .mul(21000);
-        setFee(null, null);
-        setL1Fee(fee.toString() / 10 ** 18);
+          .mul(21000)
+        setFee(null, null)
+        setL1Fee(fee.toString() / 10**18)
+      }
+      else {
+        setLoading(false);
       }
     }
   };
 
-  const switchTransferType = (e) => {
-    const f = NETWORKS.find((i) => i.from.key === toNetwork.key);
-    setFromNetwork(f);
-    setToNetwork(fromNetwork.from);
-    setSwapDetails({
-      amount: "",
-    });
+  const switchTransferType = (e) => {    
+      const f = NETWORKS.find(i => i.from.key === toNetwork.key)
+      console.log(f)
+      setFromNetwork(f)
+      setToNetwork(fromNetwork.from)
+      setSwapDetails({
+        amount: ""
+      })
   };
 
   const approveSpend = (e) => {
@@ -387,61 +384,41 @@ const Bridge = () => {
   };
 
   const renderGuidContent = () => {
-    return (
-      <div>
-        <p style={{ fontSize: "14px", lineHeight: "24px" }}>
-          1. Switch to Polygon network
-        </p>
-        <p style={{ fontSize: "14px", lineHeight: "24px" }}>
-          2. Sign the transaction and wait for confirmation
-        </p>
-        <p style={{ fontSize: "14px", lineHeight: "24px" }}>
-          3. Wait until "Switch Network" pops up
-        </p>
-        <p style={{ fontSize: "14px", lineHeight: "24px" }}>
-          4. Switch back to Ethereum mainnet. Activating a new zkSync wallet
-          costs ~$5. Enjoy trading on ZigZag!
-        </p>
-      </div>
-    );
-  };
+    return <div>
+      <p style={{fontSize: '14px', lineHeight:'24px'}}>1. Switch to Polygon network</p>
+      <p style={{fontSize: '14px', lineHeight:'24px'}}>2. Sign the transaction and wait for confirmation</p>
+      <p style={{fontSize: '14px', lineHeight:'24px'}}>3. Wait until "Switch Network" pops up</p>
+      <p style={{fontSize: '14px', lineHeight:'24px'}}>4. Switch back to Ethereum mainnet. Activating a new zkSync wallet costs ~$5. Enjoy trading on ZigZag!</p>
+    </div>
+  }
 
   const doTransfer = (e) => {
     e.preventDefault();
     let deferredXfer;
     setLoading(true);
     if (fromNetwork.from.key === "polygon" && toNetwork.key === "zksync") {
-      deferredXfer = api.transferPolygonWeth(
-        `${swapDetails.amount}`,
-        user.address
+      deferredXfer = api.transferPolygonWeth(`${swapDetails.amount}`, user.address)
+      toast.info(
+        renderGuidContent(),
+        {
+          closeOnClick: false,
+          autoClose: 15000,
+        },
       );
-      toast.info(renderGuidContent(), {
-        closeOnClick: false,
-        autoClose: 15000,
-      });
-    } else if (
-      fromNetwork.from.key === "zksync" &&
-      toNetwork.key === "polygon"
-    ) {
+    } else if (fromNetwork.from.key === "zksync" && toNetwork.key === "polygon") {
       deferredXfer = api.transferToBridge(
         `${swapDetails.amount}`,
         swapDetails.currency,
         ZKSYNC_POLYGON_BRIDGE.address,
         user.address
       );
-    } else if (
-      fromNetwork.from.key === "ethereum" &&
-      toNetwork.key === "zksync"
-    ) {
+    } else if (fromNetwork.from.key === "ethereum" && toNetwork.key === "zksync") {
       deferredXfer = api.depositL2(
         `${swapDetails.amount}`,
         swapDetails.currency,
         user.address
       );
-    } else if (
-      fromNetwork.from.key === "zksync" &&
-      toNetwork.key === "ethereum"
-    ) {
+    } else if (fromNetwork.from.key === "zksync" && toNetwork.key === "ethereum") {
       if (isFastWithdraw) {
         deferredXfer = api.transferToBridge(
           `${swapDetails.amount}`,
@@ -456,9 +433,10 @@ const Bridge = () => {
         );
       }
     } else {
-      setFormErr("Wrong from/to combination");
+      setFormErr("Wrong from/to combination")
       return false;
     }
+
 
     deferredXfer
       .then(() => {
@@ -473,41 +451,95 @@ const Bridge = () => {
   };
 
   const onSelectFromNetwork = ({ key }) => {
-    const f = NETWORKS.find((i) => i.from.key === key);
-    setFromNetwork(f);
-    setToNetwork(f.to[0]);
+    const f = NETWORKS.find((i) => i.from.key === key)
+    setFromNetwork(f)
+    setToNetwork(f.to[0])
     setSwapDetails({
-      amount: "",
-    });
+      amount: ""
+    })
+
   };
 
   const onSelectToNetwork = ({ key }) => {
-    const t = fromNetwork.to.find((i) => i.key === key);
-    setToNetwork(t);
+    const t = fromNetwork.to.find((i) => i.key === key)
+    setToNetwork(t)
     setSwapDetails({
-      amount: "",
-    });
-  };
+      amount: ""
+    })
+  }
 
   const getToBalance = () => {
     let balance, unit;
-    if (fromNetwork.from.key === "polygon") {
-      balance = altBalances["ETH"] ? altBalances["ETH"].valueReadable : "0.00";
+    if(fromNetwork.from.key === "polygon") {
+      balance = altBalances["ETH"] ? altBalances["ETH"].valueReadable : '0.00'
       unit = "ETH";
-    } else if (toNetwork.key === "polygon") {
-      balance = altBalances["WETH"]
-        ? altBalances["WETH"].valueReadable
-        : "0.00";
+    } 
+    else if(toNetwork.key === "polygon") {
+      balance = altBalances["WETH"] ? altBalances["WETH"].valueReadable : '0.00'
       unit = "WETH";
-    } else {
-      balance = altBalances[swapDetails.currency]
-        ? altBalances[swapDetails.currency].valueReadable
-        : "0.00";
+    } 
+    else {
+      balance = altBalances[swapDetails.currency] ? altBalances[swapDetails.currency].valueReadable : '0.00'
       unit = swapDetails.currency;
     }
-
+    
     return balance + " " + unit;
-  };
+  }
+
+  const onChangeInput = _.debounce(async(details)=>{
+    setLoading(true);
+
+    const setFee = async(bridgeFee, feeToken) => {
+      setL2Fee(bridgeFee)
+      setL2FeeToken(feeToken)
+      const input = parseFloat(details.amount) || 0
+      const isInputValid = validateInput(input, details.currency)
+      const isFeesValid = validateFees(input, bridgeFee, feeToken)
+      if (isFeesValid && isInputValid && input !== 0) {
+        // setTimeout(()=>{setLoading(false)},3000)
+        setFormErr("");
+      } 
+      else 
+      {
+        setLoading(false);
+      }
+    };
+
+
+    // setFee(null); setFee has two parameters. what is this?
+    setL1Fee(null);
+
+    if(fromNetwork.from.key === 'polygon') {
+      const gasFee = await api.getPolygonFee();
+      if(gasFee){
+        setL1Fee(35000 * gasFee.fast.maxFee / 10**9);
+        setFee(0, null)
+      }
+      return;
+    }
+    else if (transfer.type === "withdraw") {
+      if (api.apiProvider.syncWallet) {
+        if (isFastWithdraw) {
+          setFastWithdrawFees(setFee, details);
+        } else {
+          setNormalWithdrawFees(setFee, details);
+        }
+      }
+    } else {
+      const gasFee = await api.depositL2Fee(details.currency);
+      console.log(gasFee)
+      if(gasFee){
+        let fee = gasFee.maxFeePerGas
+          .add(gasFee.maxPriorityFeePerGas)
+          .mul(21000)
+        setFee(null, null)
+        setL1Fee(fee.toString() / 10**18)
+      }
+      else {
+        setLoading(false);
+      }
+    }
+  }, 500)
 
   return (
     <>
@@ -515,43 +547,39 @@ const Bridge = () => {
         <Pane size={"md"} variant={"light"}>
           <div className="bridge_coin_title">
             <h5>FROM</h5>
-            <L1Header
-              networks={NETWORKS}
-              onSelect={onSelectFromNetwork}
-              selectedNetwork={fromNetwork}
-            />
+            <L1Header networks={NETWORKS} onSelect={onSelectFromNetwork} selectedNetwork={fromNetwork} />
           </div>
           <BridgeSwapInput
             gasFee={L1Fee}
             bridgeFee={L2Fee}
             balances={balances}
             value={swapDetails}
-            onChange={setSwapDetails}
-            feeCurrency={L2FeeToken}
-            isOpenable={
-              !(
-                fromNetwork.from.key === "polygon" ||
-                (fromNetwork.from.key === "zksync" &&
-                  toNetwork.key === "polygon")
-              )
+            onChange={
+              e => {
+                const details = {
+                  ...swapDetails,
+                  ...e,
+                };
+                _setSwapDetails(details);
+                onChangeInput(e);
+              }
             }
+            feeCurrency={L2FeeToken}
+            isOpenable={!(fromNetwork.from.key === "polygon" || (fromNetwork.from.key === "zksync" && toNetwork.key === "polygon"))}
           />
           <div className="bridge_coin_stats">
             <div className="bridge_coin_stat">
               <h5>Estimated value</h5>
               <span>~${formatUSD(estimatedValue)}</span>
             </div>
-            {swapDetails.currency !== "ETH" &&
-            (swapCurrencyInfo?.decimals
-              ? swapDetails.amount * 10 ** swapCurrencyInfo?.decimals
-              : 0) > allowance ? (
+            {(
+              swapDetails.currency !== "ETH" &&
+              (swapCurrencyInfo?.decimals ? swapDetails.amount * 10 ** swapCurrencyInfo?.decimals : 0) > allowance
+            ) ? (
               <div className="bridge_coin_stat">
                 <h5>Available allowance</h5>
                 <span>
-                  {ethersUtils.formatUnits(
-                    allowance,
-                    swapCurrencyInfo?.decimals
-                  )}
+                  {ethersUtils.formatUnits(allowance, swapCurrencyInfo?.decimals)}
                   {` ${swapDetails.currency}`}
                 </span>
               </div>
@@ -559,9 +587,8 @@ const Bridge = () => {
             <div className="bridge_coin_stat">
               <h5>Available balance</h5>
               <span>
-                {balances[swapDetails.currency]
-                  ? balances[swapDetails.currency].valueReadable
-                  : "0.00"}
+                {balances[swapDetails.currency] ?
+                  balances[swapDetails.currency].valueReadable : '0.00'}
                 {` ${swapDetails.currency}`}
               </span>
             </div>
@@ -579,17 +606,15 @@ const Bridge = () => {
               <div className="bridge_coin_details">
                 <div className="bridge_coin_title">
                   <h5>TO</h5>
-                  <L2Header
-                    networks={fromNetwork.to}
-                    selectedNetwork={toNetwork}
-                    onSelect={onSelectToNetwork}
-                  />
+                  <L2Header networks={fromNetwork.to} selectedNetwork={toNetwork} onSelect={onSelectToNetwork} />
                 </div>
               </div>
             </div>
             <div className="bridge_coin_stat">
               <h5>Available balance</h5>
-              <span>{getToBalance()}</span>
+              <span>
+                {getToBalance()}
+              </span>
             </div>
           </div>
           <x.div
@@ -597,7 +622,7 @@ const Bridge = () => {
             display={"flex"}
             alignItems={"flex-end"}
           >
-            {fromNetwork.from.key === "zksync" && toNetwork.key === "ethereum" && (
+            {fromNetwork.from.key === 'zksync' && toNetwork.key === 'ethereum' && (
               <>
                 <RadioButtons
                   horizontal
@@ -637,9 +662,7 @@ const Bridge = () => {
                 <x.div>
                   {L2Fee && (
                     <>
-                      {fromNetwork.from.key === "zksync" &&
-                        toNetwork.key === "ethereum" &&
-                        "zkSync "}
+                      {fromNetwork.from.key === "zksync" && toNetwork.key === "ethereum" && 'zkSync '}
                       L2 gas fee: ~{L2Fee} {L2FeeToken}
                     </>
                   )}
@@ -664,7 +687,7 @@ const Bridge = () => {
                       )}
                       <x.div color={"blue-gray-300"}>
                         You'll receive:
-                        {isFastWithdraw ? " ~" : " "}
+                        {isFastWithdraw?' ~':' '}
                         {isFastWithdraw && L1Fee
                           ? formatPrice(swapDetails.amount - L1Fee)
                           : formatPrice(swapDetails.amount)}
@@ -678,13 +701,9 @@ const Bridge = () => {
                 <x.div>
                   {L1Fee && (
                     <>
-                      {fromNetwork.from.key === "polygon" &&
-                        `Polygon gas fee: ~${formatPrice(L1Fee)} MATIC`}
-                      {fromNetwork.from.key === "zksync" &&
-                        toNetwork.key === "polygon" &&
-                        `zkSync gas fee: ~${formatPrice(L1Fee)} ETH`}
-                      {fromNetwork.from.key === "ethereum" &&
-                        `Gas fee: ~${formatPrice(L1Fee)} ETH`}
+                     {fromNetwork.from.key === "polygon" && `Polygon gas fee: ~${formatPrice(L1Fee)} MATIC`}
+                     {fromNetwork.from.key === "zksync" && toNetwork.key === "polygon" && `zkSync gas fee: ~${formatPrice(L1Fee)} ETH`}
+                     {fromNetwork.from.key === "ethereum" && `Gas fee: ~${formatPrice(L1Fee)} ETH`}
                     </>
                   )}
                   {!L1Fee && (
@@ -700,20 +719,14 @@ const Bridge = () => {
                   {transfer.type === "deposit" && (
                     <x.div>
                       <x.div color={"blue-gray-300"}>
-                        You'll receive:
-                        {fromNetwork.from.key === "polygon" &&
-                          ` ~${formatPrice(swapDetails.amount)}`}
-                        {toNetwork.key === "polygon" &&
-                          ` ~${formatPrice(swapDetails.amount)}`}
-                        {fromNetwork.from.key === "ethereum" &&
-                          toNetwork.key === "zksync" &&
-                          ` ${formatPrice(swapDetails.amount)}`}
-                        {fromNetwork.from.key === "polygon" &&
-                          ` ETH on zkSync L2`}
+                      You'll receive: 
+                        {fromNetwork.from.key === "polygon" && ` ~${formatPrice(swapDetails.amount)}`}
+                        {toNetwork.key === "polygon" && ` ~${formatPrice(swapDetails.amount)}`}
+                        {fromNetwork.from.key === "ethereum" && toNetwork.key === "zksync" && ` ${formatPrice(swapDetails.amount)}`}
+
+                        {fromNetwork.from.key === "polygon" && ` ETH on zkSync L2`}
                         {toNetwork.key === "polygon" && ` WETH on Polygon`}
-                        {fromNetwork.from.key === "ethereum" &&
-                          toNetwork.key === "zksync" &&
-                          ` ${swapDetails.currency} on zkSync L2`}
+                        {fromNetwork.from.key === "ethereum" && toNetwork.key === "zksync" && ` ${swapDetails.currency} on zkSync L2`}
                       </x.div>
                     </x.div>
                   )}
@@ -732,13 +745,13 @@ const Bridge = () => {
             {!user.address && <ConnectWalletButton />}
             {user.address && (
               <>
-                {balances[swapDetails.currency] && !hasAllowance && !hasError && (
+                {balances[swapDetails.currency] && !hasAllowance && !hasError &&(
                   <Button
                     loading={isApproving}
                     className={cx("bg_btn", {
                       zig_disabled:
-                        formErr.length > 0 ||
-                        Number(swapDetails.amount) === 0 ||
+                        formErr.length > 0 || 
+                        Number(swapDetails.amount) === 0 || 
                         swapDetails.currency === "ETH",
                     })}
                     text="APPROVE"
@@ -746,6 +759,7 @@ const Bridge = () => {
                     onClick={approveSpend}
                   />
                 )}
+                {console.log("******************************",hasError)}
                 {hasError && (
                   <Button
                     className="bg_btn zig_btn_disabled bg_err"
@@ -766,7 +780,7 @@ const Bridge = () => {
                     text="TRANSFER"
                     icon={<MdSwapCalls />}
                     onClick={doTransfer}
-                  />
+                  />                  
                 )}
               </>
             )}
@@ -791,6 +805,7 @@ const Bridge = () => {
           Disconnected
         </div>
       )}
+      
     </>
   );
 };
