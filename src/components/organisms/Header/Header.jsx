@@ -22,6 +22,7 @@ export const Header = (props) => {
   const [show, setShow] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const user = useSelector(userSelector);
+  console.log(user)
   const network = useSelector(networkSelector);
   const hasBridge = api.isImplemented("depositL2");
   const history = useHistory();
@@ -126,7 +127,7 @@ export const Header = (props) => {
             </div>
             <div className="head_right">
               <div className="d-flex align-items-center justify-content-between">
-                {user.id && user.address ? (
+                {user.address ? (
                   <Dropdown overlay={dropdownMenu}>
                     <button className="address_button">
                       {user.address.slice(0, 8)}···
@@ -294,7 +295,7 @@ export const Header = (props) => {
               <BiChevronDown className="eu_caret" />
             </label>
             <div className="head_account_area">
-              {user.id && user.address ? (
+              {user.address ? (
                 <AccountDropdown />
               ) : (
                 <Button
