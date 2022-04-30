@@ -528,7 +528,7 @@ export class SpotForm extends React.Component {
               onChange={this.rangeSliderHandler.bind(this)}
             />
           </div>
-          {this.props.user.id ? (
+          {this.props.user.address ? (
             <div className="">
               <div className="spf_head">
                 <span>Total</span>
