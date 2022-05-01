@@ -24,8 +24,8 @@ export class OrdersTable extends React.Component {
 
   renderOrderTable(orders) {
     return (
-      <table>
-        <thead>
+        <table>
+          <thead>
           <tr>
             <th scope="col">Market</th>
             <th scope="col">Time</th>
@@ -37,8 +37,8 @@ export class OrdersTable extends React.Component {
             <th scope="col">Order Status</th>
             <th scope="col">Action</th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {orders.map((order, i) => {
             const orderId = order[1];
             const market = order[2];
@@ -91,12 +91,12 @@ export class OrdersTable extends React.Component {
                 break;
               case "pm":
                 statusText = (
-                  <span>
+                    <span>
                     partial match
                     <img
-                      className="loading-gif"
-                      src={loadingGif}
-                      alt="Pending"
+                        className="loading-gif"
+                        src={loadingGif}
+                        alt="Pending"
                     />
                   </span>
                 );
@@ -104,26 +104,26 @@ export class OrdersTable extends React.Component {
                 break;
               case "m":
                 statusText = (
-                  <span>
+                    <span>
                     matched{" "}
-                    <img
-                      className="loading-gif"
-                      src={loadingGif}
-                      alt="Pending"
-                    />
+                      <img
+                          className="loading-gif"
+                          src={loadingGif}
+                          alt="Pending"
+                      />
                   </span>
                 );
                 statusClass = "matched";
                 break;
               case "b":
                 statusText = (
-                  <span>
+                    <span>
                     committing{" "}
-                    <img
-                      className="loading-gif"
-                      src={loadingGif}
-                      alt="Pending"
-                    />
+                      <img
+                          className="loading-gif"
+                          src={loadingGif}
+                          alt="Pending"
+                      />
                   </span>
                 );
                 statusClass = "committing";
@@ -145,40 +145,40 @@ export class OrdersTable extends React.Component {
             }
 
             return (
-              <tr key={orderId}>
-                <td data-label="Market">{market}</td>
-                <td data-label="Time">{time}</td>
-                <td data-label="Price">{price.toPrecision(6) / 1}</td>
-                <td data-label="Quantity">
-                  {baseQuantity.toPrecision(6) / 1} {baseCurrency}
-                </td>
-                <td data-label="Remaining">
-                  {remaining.toPrecision(6) / 1} {baseCurrency}
-                </td>
-                <td className={sideclassname} data-label="Side">
-                  {side}
-                </td>
-                <td data-label="Expiry">{expiryText}</td>
-                <td className={statusClass} data-label="Order Status">
-                  {statusText}
-                </td>
-                <td data-label="Action">
-                  {orderStatus === "o" ? (
-                    <span
-                      className="cancel_order_link"
-                      onClick={() => api.cancelOrder(orderId)}
-                    >
+                <tr key={orderId}>
+                  <td data-label="Market">{market}</td>
+                  <td data-label="Time">{time}</td>
+                  <td data-label="Price">{price.toPrecision(6) / 1}</td>
+                  <td data-label="Quantity">
+                    {baseQuantity.toPrecision(6) / 1} {baseCurrency}
+                  </td>
+                  <td data-label="Remaining">
+                    {remaining.toPrecision(6) / 1} {baseCurrency}
+                  </td>
+                  <td className={sideclassname} data-label="Side">
+                    {side}
+                  </td>
+                  <td data-label="Expiry">{expiryText}</td>
+                  <td className={statusClass} data-label="Order Status">
+                    {statusText}
+                  </td>
+                  <td data-label="Action">
+                    {orderStatus === "o" ? (
+                        <span
+                            className="cancel_order_link"
+                            onClick={() => api.cancelOrder(orderId)}
+                        >
                       Cancel
                     </span>
-                  ) : (
-                    ""
-                  )}
-                </td>
-              </tr>
+                    ) : (
+                        ""
+                    )}
+                  </td>
+                </tr>
             );
           })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
     );
   }
 
@@ -196,8 +196,8 @@ export class OrdersTable extends React.Component {
         baseExplorerUrl = "https://zkscan.io/explorer/transactions/";
     }
     return (
-      <table>
-        <thead>
+        <table>
+          <thead>
           <tr>
             <th scope="col">Market</th>
             <th scope="col">Time</th>
@@ -208,8 +208,8 @@ export class OrdersTable extends React.Component {
             <th scope="col">Order Status</th>
             <th scope="col">Action</th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {fills.map((fill, i) => {
             const fillid = fill[1];
             const market = fill[2];
@@ -225,10 +225,10 @@ export class OrdersTable extends React.Component {
             const feetoken = fill[11];
             let feeText = "1 USDC";
             const marketInfo = api.marketInfo[market];
-            if(feeamount && feetoken) {           
+            if(feeamount && feetoken) {
               const displayFee = (feeamount > 9999) ? feeamount.toFixed(0) : feeamount.toPrecision(4);
               feeText = (feeamount !== 0) ? `${displayFee} ${feetoken}` : "--";
-            } else if(["b", "o", "m", "r"].includes(fillstatus)) {
+            } else if(["b", "o", "m", "r", "e"].includes(fillstatus)) {
               feeText = "--";
               // cases below make it backward compatible:
             } else if (!marketInfo) {
@@ -239,7 +239,7 @@ export class OrdersTable extends React.Component {
               feeText = marketInfo.baseFee + " " + marketInfo.baseAsset.symbol;
             } else if (side === "b") {
               feeText =
-                marketInfo.quoteFee + " " + marketInfo.quoteAsset.symbol;
+                  marketInfo.quoteFee + " " + marketInfo.quoteAsset.symbol;
             }
             if (api.isZksyncChain()) {
               price = Number(fill[4]);
@@ -261,12 +261,12 @@ export class OrdersTable extends React.Component {
                 break;
               case "pm":
                 statusText = (
-                  <span>
+                    <span>
                     partial match
                     <img
-                      className="loading-gif"
-                      src={loadingGif}
-                      alt="Pending"
+                        className="loading-gif"
+                        src={loadingGif}
+                        alt="Pending"
                     />
                   </span>
                 );
@@ -274,26 +274,26 @@ export class OrdersTable extends React.Component {
                 break;
               case "m":
                 statusText = (
-                  <span>
+                    <span>
                     matched{" "}
-                    <img
-                      className="loading-gif"
-                      src={loadingGif}
-                      alt="Pending"
-                    />
+                      <img
+                          className="loading-gif"
+                          src={loadingGif}
+                          alt="Pending"
+                      />
                   </span>
                 );
                 statusClass = "matched";
                 break;
               case "b":
                 statusText = (
-                  <span>
+                    <span>
                     committing{" "}
-                    <img
-                      className="loading-gif"
-                      src={loadingGif}
-                      alt="Pending"
-                    />
+                      <img
+                          className="loading-gif"
+                          src={loadingGif}
+                          alt="Pending"
+                      />
                   </span>
                 );
                 statusClass = "committing";
@@ -315,39 +315,39 @@ export class OrdersTable extends React.Component {
             }
 
             return (
-              <tr key={fillid}>
-                <td data-label="Market">{market}</td>
-                <td data-label="Time">{time}</td>
-                <td data-label="Price">{price.toPrecision(6) / 1}</td>
-                <td data-label="Quantity">
-                  {baseQuantity.toPrecision(6) / 1}{" "}
-                  {marketInfo && marketInfo.baseAsset.symbol}
-                </td>
-                <td className={sideclassname} data-label="Side">
-                  {sidetext}
-                </td>
-                <td data-label="Fee">{feeText}</td>
-                <td className={statusClass} data-label="Order Status">
-                  {statusText}
-                </td>
-                <td data-label="Action">
-                  {txhash ? (
-                    <a
-                      href={baseExplorerUrl + txhash}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View Tx
-                    </a>
-                  ) : (
-                    ""
-                  )}
-                </td>
-              </tr>
+                <tr key={fillid}>
+                  <td data-label="Market">{market}</td>
+                  <td data-label="Time">{time}</td>
+                  <td data-label="Price">{price.toPrecision(6) / 1}</td>
+                  <td data-label="Quantity">
+                    {baseQuantity.toPrecision(6) / 1}{" "}
+                    {marketInfo && marketInfo.baseAsset.symbol}
+                  </td>
+                  <td className={sideclassname} data-label="Side">
+                    {sidetext}
+                  </td>
+                  <td data-label="Fee">{feeText}</td>
+                  <td className={statusClass} data-label="Order Status">
+                    {statusText}
+                  </td>
+                  <td data-label="Action">
+                    {txhash ? (
+                        <a
+                            href={baseExplorerUrl + txhash}
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                          View Tx
+                        </a>
+                    ) : (
+                        ""
+                    )}
+                  </td>
+                </tr>
             );
           })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
     );
   }
 
@@ -356,18 +356,18 @@ export class OrdersTable extends React.Component {
     switch (api.apiProvider.network) {
       case 1000:
         explorerLink =
-          "https://rinkeby.zkscan.io/explorer/accounts/" +
-          this.props.user.address;
+            "https://rinkeby.zkscan.io/explorer/accounts/" +
+            this.props.user.address;
         break;
       case 1:
       default:
         explorerLink =
-          "https://zkscan.io/explorer/accounts/" + this.props.user.address;
+            "https://zkscan.io/explorer/accounts/" + this.props.user.address;
     }
     let footerContent,
-      classNameOrders = "",
-      classNameBalances = "",
-      classNameFills = "";
+        classNameOrders = "",
+        classNameBalances = "",
+        classNameFills = "";
     switch (this.state.tab) {
       case "orders":
         footerContent = this.renderOrderTable(this.getUserOrders());
@@ -380,45 +380,45 @@ export class OrdersTable extends React.Component {
       case "balances":
         if (this.props.user.committed) {
           const balancesContent = Object.keys(
-            this.props.user.committed.balances
+              this.props.user.committed.balances
           )
-            .sort()
-            .map((token) => {
-              const currencyInfo = api.getCurrencyInfo(token);
-              if (!currencyInfo) return "";
-              let balance = this.props.user.committed.balances[token];
-              balance = parseInt(balance) / Math.pow(10, currencyInfo.decimals);
-              return (
-                <tr>
-                  <td data-label="Token">{token}</td>
-                  <td data-label="Balance">{balance}</td>
-                </tr>
-              );
-            });
+              .sort()
+              .map((token) => {
+                const currencyInfo = api.getCurrencyInfo(token);
+                if (!currencyInfo) return "";
+                let balance = this.props.user.committed.balances[token];
+                balance = parseInt(balance) / Math.pow(10, currencyInfo.decimals);
+                return (
+                    <tr>
+                      <td data-label="Token">{token}</td>
+                      <td data-label="Balance">{balance}</td>
+                    </tr>
+                );
+              });
           footerContent = (
-            <div>
-              <table className="balances_table">
-                <thead>
+              <div>
+                <table className="balances_table">
+                  <thead>
                   <tr>
                     <th scope="col">Token</th>
                     <th scope="col">Balance</th>
                   </tr>
-                </thead>
-                <tbody>{balancesContent}</tbody>
-              </table>
+                  </thead>
+                  <tbody>{balancesContent}</tbody>
+                </table>
 
-              <a href={explorerLink} target="_blank" rel="noreferrer">
-                View Account on Explorer
-              </a>
-            </div>
+                <a href={explorerLink} target="_blank" rel="noreferrer">
+                  View Account on Explorer
+                </a>
+              </div>
           );
         } else {
           footerContent = (
-            <div>
-              <a href={explorerLink} target="_blank" rel="noreferrer">
-                View Account on Explorer
-              </a>
-            </div>
+              <div>
+                <a href={explorerLink} target="_blank" rel="noreferrer">
+                  View Account on Explorer
+                </a>
+              </div>
           );
         }
         classNameBalances = "selected";
@@ -428,35 +428,35 @@ export class OrdersTable extends React.Component {
     }
 
     return (
-      <>
-        <div className="footer">
-          <div className="footer_container">
-            <div>
-              <div className="ft_tabs">
-                <strong
-                  className={classNameOrders}
-                  onClick={() => this.setTab("orders")}
-                >
-                  Orders ({this.getUserOrders().length})
-                </strong>
-                <strong
-                  className={classNameFills}
-                  onClick={() => this.setTab("fills")}
-                >
-                  Fills ({this.getFills().length})
-                </strong>
-                <strong
-                  className={classNameBalances}
-                  onClick={() => this.setTab("balances")}
-                >
-                  Balances
-                </strong>
+        <>
+          <div className="footer">
+            <div className="footer_container">
+              <div>
+                <div className="ft_tabs">
+                  <strong
+                      className={classNameOrders}
+                      onClick={() => this.setTab("orders")}
+                  >
+                    Orders ({this.getUserOrders().length})
+                  </strong>
+                  <strong
+                      className={classNameFills}
+                      onClick={() => this.setTab("fills")}
+                  >
+                    Fills ({this.getFills().length})
+                  </strong>
+                  <strong
+                      className={classNameBalances}
+                      onClick={() => this.setTab("balances")}
+                  >
+                    Balances
+                  </strong>
+                </div>
               </div>
+              <div className="footer_orders">{footerContent}</div>
             </div>
-            <div className="footer_orders">{footerContent}</div>
           </div>
-        </div>
-      </>
+        </>
     );
   }
 }

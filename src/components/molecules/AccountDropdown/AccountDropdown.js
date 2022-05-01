@@ -31,6 +31,13 @@ const DropdownDisplay = styled.div`
   pointer-events: none;
   display: flex;
   flex-direction: column;
+  
+  @media screen and (max-width: 991px) {
+    position: fixed;
+    margin-top: 0;
+    width: 100%;
+    border-radius: 0;
+  }
 `;
 
 const DropdownButton = styled.div`
@@ -102,7 +109,6 @@ const WalletToggle = styled.ul`
   list-style-type: none;
   border: 1px solid #666;
   border-radius: 33px;
-  height: 33px;
   padding: 3px;
 `;
 
@@ -176,6 +182,9 @@ const DropdownFooter = styled.div`
   overflow: hidden;
   width: 100%;
   flex-shrink: 0;
+  @media screen and (max-width: 991px) {
+    border-radius: 0;
+  }
 `;
 
 const SignOutButton = styled.div`
@@ -217,7 +226,7 @@ export const AccountDropdown = () => {
   const { profile } = user;
 
   const wallet =
-    selectedLayer === 1 ? balanceData.wallet : balanceData[network];
+      selectedLayer === 1 ? balanceData.wallet : balanceData[network];
 
   useEffect(() => {
     const hideDisplay = () => setShow(false);
@@ -236,6 +245,13 @@ export const AccountDropdown = () => {
 
   const filterSmallBalances = (currency) => {
     const balance = wallet[currency].valueReadable;
+    const usdBalance = coinEstimator(currency) * wallet[currency].valueReadable;
+
+    //filter out small balances L2 below 2cents
+    if(selectedLayer !== 1){
+      if(usdBalance < 0.02) return false;
+    }
+
     if (balance) {
       return Number(balance) > 0;
     } else {
@@ -254,77 +270,77 @@ export const AccountDropdown = () => {
   };
 
   return (
-    <DropdownContainer
-      onKeyDown={handleKeys}
-      onClick={(e) => e.stopPropagation()}
-      show={show}
-      tabIndex="0"
-    >
-      <DropdownButton onClick={() => setShow(!show)} tabIndex="0">
-        <AvatarImg src={profile.image} alt={profile.name} />
-        {profile.name}
-        <AiOutlineCaretDown />
-      </DropdownButton>
-      <DropdownDisplay>
-        <DropdownHeader>
-          <h3>Your Wallet</h3>
-          <WalletToggle>
-            <WalletToggleItem
-              onClick={() => setSelectedLayer(1)}
-              show={selectedLayer === 1}
-            >
-              L1
-            </WalletToggleItem>
-            <WalletToggleItem
-              onClick={() => setSelectedLayer(2)}
-              show={selectedLayer === 2}
-            >
-              L2
-            </WalletToggleItem>
-          </WalletToggle>
-        </DropdownHeader>
-        <DropdownContent>
-          {!wallet && (
-            <LoaderContainer>
-              <Loader type="TailSpin" color="#444" height={24} width={24} />
-            </LoaderContainer>
-          )}
-          {wallet && (
-            <CurrencyList>
-              {Object.keys(wallet)
-                .filter(filterSmallBalances)
-                .sort(sortByNotional)
-                .map((ticker, key) => {
-                  return (
-                    <CurrencyListItem key={key}>
-                      <img
-                        className="currency-icon"
-                        src={api.getCurrencyLogo(ticker)}
-                        alt={ticker}
-                      />
-                      <div>
-                        <strong>
-                          {wallet[ticker].valueReadable} {ticker}
-                        </strong>
-                        <small>
-                          $
-                          {formatUSD(
-                            coinEstimator(ticker) * wallet[ticker].valueReadable
-                          )}
-                        </small>
-                      </div>
-                    </CurrencyListItem>
-                  );
-                })}
-            </CurrencyList>
-          )}
-        </DropdownContent>
-        <DropdownFooter>
-          <SignOutButton onClick={() => api.signOut()}>
-            <IoMdLogOut style={{ position: "relative", top: -1 }} /> Disconnect
-          </SignOutButton>
-        </DropdownFooter>
-      </DropdownDisplay>
-    </DropdownContainer>
+      <DropdownContainer
+          onKeyDown={handleKeys}
+          onClick={(e) => e.stopPropagation()}
+          show={show}
+          tabIndex="0"
+      >
+        <DropdownButton onClick={() => setShow(!show)} tabIndex="0">
+          <AvatarImg src={profile.image} alt={profile.name} />
+          {profile.name}
+          <AiOutlineCaretDown />
+        </DropdownButton>
+        <DropdownDisplay>
+          <DropdownHeader>
+            <h3>Your Wallet</h3>
+            <WalletToggle>
+              <WalletToggleItem
+                  onClick={() => setSelectedLayer(1)}
+                  show={selectedLayer === 1}
+              >
+                L1
+              </WalletToggleItem>
+              <WalletToggleItem
+                  onClick={() => setSelectedLayer(2)}
+                  show={selectedLayer === 2}
+              >
+                L2
+              </WalletToggleItem>
+            </WalletToggle>
+          </DropdownHeader>
+          <DropdownContent>
+            {!wallet && (
+                <LoaderContainer>
+                  <Loader type="TailSpin" color="#444" height={24} width={24} />
+                </LoaderContainer>
+            )}
+            {wallet && (
+                <CurrencyList>
+                  {Object.keys(wallet)
+                      .filter(filterSmallBalances)
+                      .sort(sortByNotional)
+                      .map((ticker, key) => {
+                        return (
+                            <CurrencyListItem key={key}>
+                              <img
+                                  className="currency-icon"
+                                  src={api.getCurrencyLogo(ticker)}
+                                  alt={ticker}
+                              />
+                              <div>
+                                <strong>
+                                  {wallet[ticker].valueReadable} {ticker}
+                                </strong>
+                                <small>
+                                  $
+                                  {formatUSD(
+                                      coinEstimator(ticker) * wallet[ticker].valueReadable
+                                  )}
+                                </small>
+                              </div>
+                            </CurrencyListItem>
+                        );
+                      })}
+                </CurrencyList>
+            )}
+          </DropdownContent>
+          <DropdownFooter>
+            <SignOutButton onClick={() => api.signOut()}>
+              <IoMdLogOut style={{ position: "relative", top: -1 }} /> Disconnect
+            </SignOutButton>
+          </DropdownFooter>
+        </DropdownDisplay>
+      </DropdownContainer>
   );
 };
