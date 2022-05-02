@@ -357,6 +357,7 @@ export class SpotForm extends React.Component {
   }
 
   rangeSliderHandler(e, val) {
+
     const marketInfo = this.props.marketInfo;
     if (!marketInfo) return 0;
     if (!this.props.user.id) return false;
@@ -388,7 +389,10 @@ export class SpotForm extends React.Component {
         newstate.baseAmount = 0;
       } else {
         newstate.baseAmount = displayAmount;
+        
       }
+      this.setState(newstate);
+
     } else if (this.props.side === "b") {
       const quoteBalance = this.getQuoteBalance();
       const quoteDecimals = marketInfo.quoteAsset.decimals;
@@ -412,7 +416,6 @@ export class SpotForm extends React.Component {
                 ? baseDisplayAmount.toFixed(0)
                 : baseDisplayAmount.toPrecision(5);
       }
-
       if (isNaN(newstate.baseAmount)) newstate.baseAmount = 0;
       if (isNaN(newstate.quoteAmount)) newstate.quoteAmount = 0;
       this.setState(newstate);
