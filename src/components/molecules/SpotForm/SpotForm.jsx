@@ -29,7 +29,6 @@ export class SpotForm extends React.Component {
   updateAmount(e) {
     const newState = { ...this.state };
     newState.baseAmount = e.target.value;
-    localStorage.setItem("baseAmount", e.target.value);
     newState.quoteAmount = "";
     this.setState(newState);
   }
@@ -310,7 +309,7 @@ export class SpotForm extends React.Component {
     if (this.props.side === "s") {
       const baseBalance = this.getBaseBalance() - marketInfo.baseFee;
       const baseAmount =
-          localStorage.getItem("baseAmount") || this.state.baseAmount || 0;
+       this.state.baseAmount || 0;
       return Math.round((baseAmount / baseBalance) * 100);
     } else if (this.props.side === "b") {
       const quoteBalance = this.getQuoteBalance() - marketInfo.quoteFee;
@@ -319,7 +318,7 @@ export class SpotForm extends React.Component {
         return Math.round((quoteAmount / quoteBalance) * 100);
       } else {
         const baseAmount =
-            localStorage.getItem("baseAmount") || this.state.baseAmount || 0;
+         this.state.baseAmount || 0;
         const total = baseAmount * this.currentPrice();
         return Math.round((total / quoteBalance) * 100);
       }
@@ -516,9 +515,7 @@ export class SpotForm extends React.Component {
             <input
               type="text"
               value={
-                localStorage.getItem("baseAmount")
-                    ? localStorage.getItem("baseAmount")
-                    : this.state.baseAmount
+           this.state.baseAmount
               }
               placeholder="0.00"
               onChange={this.updateAmount.bind(this)}
