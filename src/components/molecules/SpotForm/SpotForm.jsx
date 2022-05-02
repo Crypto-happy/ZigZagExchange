@@ -389,6 +389,8 @@ export class SpotForm extends React.Component {
       } else {
         newstate.baseAmount = displayAmount;
       }
+      this.setState(newstate);
+
     } else if (this.props.side === "b") {
       const quoteBalance = this.getQuoteBalance();
       const quoteDecimals = marketInfo.quoteAsset.decimals;
